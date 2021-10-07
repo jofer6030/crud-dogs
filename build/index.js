@@ -19,28 +19,25 @@ var port = process.env.PORT || 4000;
 var host = process.env.HOST || "0.0.0.0";
 var dbUrl = process.env.MONGO_URL;
 app.use(_express["default"].json());
-var whitelist = [process.env.FRONTEND_URL];
-var corsOptions = {
-  origin: function origin(_origin, callback) {
-    var existe = whitelist.some(function (dominio) {
-      return dominio === _origin;
-    });
-
-    if (existe) {
-      callback(null, true);
-    } else {
-      callback(new Error("No permitido por CORS"));
-    }
-  }
-};
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin : *");
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method");
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
   res.header("Allow", "GET, POST, OPTIONS, PUT, DELETE");
   next();
 });
-app.use((0, _cors["default"])(corsOptions));
+var config = {
+  application: {
+    cors: {
+      server: [{
+        origin: process.env.FRONTEND_URL,
+        //servidor que deseas que consuma o (*) en caso que sea acceso libre
+        credentials: true
+      }]
+    }
+  }
+};
+app.use((0, _cors["default"])(config.application.cors.server));
 
 _mongoose["default"].connect(dbUrl).then(function (db) {
   return console.log("db conectado");

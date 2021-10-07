@@ -14,32 +14,29 @@ const dbUrl = process.env.MONGO_URL;
 
 app.use(express.json());
 
-const whitelist = [process.env.FRONTEND_URL];
-const corsOptions = {
-  origin: (origin, callback) => {
-    const existe = whitelist.some((dominio) => dominio === origin);
-    if (existe) {
-      callback(null, true);
-    } else {
-      callback(new Error("No permitido por CORS"));
-    }
-  },
-};
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin : *");
-
+  res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Headers",
     "Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method"
   );
-
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-
   res.header("Allow", "GET, POST, OPTIONS, PUT, DELETE");
-
   next();
 });
-app.use(cors(corsOptions));
+const config = {
+  application: {
+    cors: {
+      server: [
+        {
+          origin: process.env.FRONTEND_URL, //servidor que deseas que consuma o (*) en caso que sea acceso libre
+          credentials: true,
+        },
+      ],
+    },
+  },
+};
+app.use(cors(config.application.cors.server));
 
 mongoose
   .connect(dbUrl)
